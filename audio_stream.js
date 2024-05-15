@@ -13,9 +13,9 @@ let songQueue = [];
 async function playAudio(connection, url) {
   const stream = ytdl(url, { 
     filter: 'audioonly', 
-    highWaterMark: 1 << 25,
+    highWaterMark: 1 << 27,
     quality: 'highestaudio',
-    liveBuffer: 20000 
+    liveBuffer: 30000
   }).pipe(new prism.FFmpeg({
     args: [
       '-analyzeduration', '0',

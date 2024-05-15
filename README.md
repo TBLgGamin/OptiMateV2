@@ -37,7 +37,7 @@ Displays a list of available commands and their descriptions.
 1. Clone the repository:
     ```bash
     git clone https://github.com/TBLgGamin/OptiMateV2
-    cd OptiMateV4
+    cd OptiMateV2
     ```
 
 2. Install the required dependencies:
