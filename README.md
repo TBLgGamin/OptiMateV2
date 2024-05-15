@@ -45,10 +45,11 @@ Displays a list of available commands and their descriptions.
     npm install discord.js @discordjs/voice ytdl-core prism-media dotenv
     ```
 
-3. Create a `.env` file in the project directory and add your Discord bot token:
+3. Edit the `.env.copy` file in the project directory and add your Discord bot token:
     ```env
     OptiMateV2Token=YOUR_DISCORD_BOT_TOKEN
     ```
+    Rename the file to .env
 
 ## Usage
 
