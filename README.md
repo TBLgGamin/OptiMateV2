@@ -1,6 +1,6 @@
-# OptiMateV4 Discord Bot
+# OptiMateV2 Discord Bot
 
-OptiMateV4 is a Discord bot designed to play high-quality audio from YouTube in your Discord voice channels. It includes commands to play, queue, stop, and manage playback of audio tracks.
+OptiMateV2 is a Discord bot designed to play high-quality audio from YouTube in your Discord voice channels. It includes commands to play, queue, stop, and manage playback of audio tracks.
 
 ## Features
 
@@ -36,7 +36,7 @@ Displays a list of available commands and their descriptions.
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/your-username/OptiMateV4.git
+    git clone https://github.com/TBLgGamin/OptiMateV2
     cd OptiMateV4
     ```
 
@@ -89,5 +89,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Contact
 
-For any questions or feedback, please open an issue on the repository or contact the project maintainer at your-email@example.com.
-
+For any questions or feedback, please open an issue on the repository or contact the project maintainer at tblthe1st@gmail.com
