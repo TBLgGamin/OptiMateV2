@@ -1,7 +1,4 @@
 npm install discord.js @discordjs/voice ytdl-core prism-media dotenv spotify-url-info@latest play-dl @discordjs/opus opusscript
-Install node.js
 choco install ffmpeg-full
 choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --passive --locale en-US"
 npm install opusscript
-
-#Add discord bot token to ENV file

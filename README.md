@@ -34,6 +34,14 @@ Displays a list of available commands and their descriptions.
 
 ## Installation
 
+Run install.js to install all the required dependencies and packages for the bot to run.
+    ```bash
+    git clone https://github.com/TBLgGamin/OptiMateV2
+    cd OptiMateV2
+    node install.js
+    ```
+If that doesnt work you can use the manual install method as listed below:
+
 1. Clone the repository:
     ```bash
     git clone https://github.com/TBLgGamin/OptiMateV2
