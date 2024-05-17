@@ -38,8 +38,16 @@ Shows the currently playing song and timestamp.
 ### !skip
 Skips the current song and plays the next one in the queue.
 
+### !vote <song number>
+Vote for the next song to be played from the queue.
+
+### !dj <url>
+Enables AutoDJ mode, playing related songs automatically after the current queue is finished.
+
 ## Installation
 
+Before trying to install the code you need your own bot and its token to insert into the .env file.
+A tutorial can be found here: https://www.youtube.com/watch?v=hoDLj0IzZMU&t=1s watch from 1:30 to 4:10
 Run install.js to install all the required dependencies and packages for the bot to run.
 *Navigate to powershell as administrator*
 1. Automatic install:
@@ -58,7 +66,7 @@ If that doesn't work you can use the manual install method as listed below:
 
 2. Install the required dependencies:
     ```bash
-    npm install discord.js @discordjs/voice ytdl-core prism-media dotenv spotify-url-info@latest play-dl @discordjs/opus opusscript
+    npm install discord.js @discordjs/voice ytdl-core prism-media dotenv spotify-url-info@latest play-dl @discordjs/opus opusscript axios cheerio
     ```
 
 *After you've installed the dependencies head to windows powershell as administrator*
@@ -99,6 +107,7 @@ If that doesn't work you can use the manual install method as listed below:
 - `audio_stream.js`: Handles audio streaming and queue management.
 - `command_handler.js`: Contains functions for stop, force play, and pause/resume commands.
 - `helpme.js`: Provides the help command implementation.
+- `autodj.js`: Implements the AutoDJ feature.
 - `.env`: Stores the bot token securely (not included in the repository).
 
 ## Contributing

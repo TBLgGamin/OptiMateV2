@@ -1,17 +1,27 @@
-const { playAudio, handleError, songQueue, playNextSong, getYouTubeUrlFromSpotify } = require('./audio_stream');
-const { getVoiceConnection, AudioPlayerStatus } = require('@discordjs/voice');
+const { playAudio, handleError, songQueue, getYouTubeUrlFromSpotify } = require('./audio_stream');
+const { getVoiceConnection, createAudioPlayer, AudioPlayerStatus } = require('@discordjs/voice');
 const { EmbedBuilder } = require('discord.js');
 const playdl = require('play-dl');
+const { autodj } = require('./autodj');
 
 async function force(message, url) {
   const connection = getVoiceConnection(message.guild.id);
   if (connection) {
     try {
       songQueue.length = 0;
-      const youtubeUrl = url.includes('spotify.com') ? await getYouTubeUrlFromSpotify(url) : url;
-      const videoInfo = await playdl.video_info(youtubeUrl);
-      await playAudio(connection, youtubeUrl, videoInfo);
-      message.reply('Forcing song to play.');
+
+      if (url.includes('spotify.com/playlist')) {
+        await addSpotifyPlaylistToQueue(message, connection, url);
+      } else {
+        const youtubeUrl = url.includes('spotify.com') ? await getYouTubeUrlFromSpotify(url) : url;
+        const videoInfo = await playdl.video_info(youtubeUrl);
+
+        const player = connection.state.subscription ? connection.state.subscription.player : createAudioPlayer();
+        connection.subscribe(player);
+
+        await playAudio(connection, youtubeUrl, videoInfo, player);
+        message.reply('Forcing song to play.');
+      }
     } catch (error) {
       console.error('Error forcing song to play:', error);
       await handleError(message, 'There was an error forcing the song to play.');
@@ -21,12 +31,14 @@ async function force(message, url) {
   }
 }
 
+
 function stop(message) {
   const connection = getVoiceConnection(message.guild.id);
   if (connection && connection.state.subscription) {
     const player = connection.state.subscription.player;
     songQueue.length = 0;
     player.stop(true);
+    autodj.stopAutoDJ();
     message.reply('Stopped playing and cleared the queue.');
   } else {
     message.reply('I am not in a voice channel or no music is playing.');

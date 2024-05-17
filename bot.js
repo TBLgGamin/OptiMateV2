@@ -1,8 +1,9 @@
 require('dotenv').config();
 const { Client, GatewayIntentBits } = require('discord.js');
-const { joinVoiceChannel, getVoiceConnection, VoiceConnectionStatus, createAudioPlayer, NoSubscriberBehavior } = require('@discordjs/voice');
-const { handleError, addSongToQueue, displayQueue, songQueue, createAudioPlayerAndSubscribe } = require('./audio_stream');
-const { stop, force, pauseOrResume, nowPlaying, skip} = require('./command_handler');
+const { joinVoiceChannel, getVoiceConnection, VoiceConnectionStatus } = require('@discordjs/voice');
+const { handleError, addSongToQueue, displayQueue, createAudioPlayerAndSubscribe, voteForNextSong, addSpotifyPlaylistToQueue } = require('./audio_stream');
+const { stop, force, pauseOrResume, nowPlaying, skip } = require('./command_handler');
+const { autodj } = require('./autodj');
 const { helpme } = require('./helpme');
 
 const client = new Client({
@@ -83,6 +84,21 @@ client.on('messageCreate', async (message) => {
     nowPlaying(message);
   } else if (message.content.startsWith('!skip')) {
     skip(message);
+  } else if (message.content.startsWith('!dj')) {
+    const args = message.content.split(' ');
+    const url = args[1];
+    if (!url) {
+      return handleError(message, 'Please provide a valid URL.');
+    }
+    autodj(message, url);
+  } else if (message.content.startsWith('!vote')) {
+    const args = message.content.split(' ');
+    const songIndex = args[1];
+    if (songIndex) {
+      voteForNextSong(message, songIndex);
+    } else {
+      handleError(message, 'Please provide a valid song number.');
+    }
   }
 });
 
