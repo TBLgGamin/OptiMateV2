@@ -36,6 +36,7 @@ Displays a list of available commands and their descriptions.
 
 Run install.js to install all the required dependencies and packages for the bot to run.
 *Navigate to powershell as administrator*
+1. Automatic install:
     ```bash
     git clone https://github.com/TBLgGamin/OptiMateV2
     cd OptiMateV2
