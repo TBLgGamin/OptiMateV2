@@ -1,4 +1,4 @@
-const ytdl = require('ytdl-core');
+const ytdl = require('ytdl-core-discord');
 const { 
   createAudioPlayer, 
   createAudioResource, 
@@ -14,21 +14,12 @@ const { getData } = require('spotify-url-info')(fetch);
 let songQueue = [];
 
 async function playAudio(connection, url) {
-  const stream = ytdl(url, { 
+  const stream = await ytdl(url, { 
     filter: 'audioonly', 
-    highWaterMark: 1 << 27,
+    highWaterMark: 1 << 25,
     quality: 'highestaudio',
     liveBuffer: 30000
-  }).pipe(new prism.FFmpeg({
-    args: [
-      '-analyzeduration', '0',
-      '-loglevel', '0',
-      '-acodec', 'libopus',
-      '-f', 'opus',
-      '-ar', '48000',
-      '-ac', '2',
-    ],
-  }));
+  });
 
   const resource = createAudioResource(stream, { inlineVolume: true });
 
@@ -45,12 +36,14 @@ async function playAudio(connection, url) {
 
   player.on('error', (error) => {
     console.error('Player error:', error.message);
+    handleError(message, 'An error occurred during playback.');
     player.stop(true);
     connection.destroy();
   });
 
   connection.on('error', (error) => {
     console.error('Connection error:', error.message);
+    handleError(message, 'An error occurred with the voice connection.');
     player.stop(true);
     connection.destroy();
   });
@@ -104,7 +97,10 @@ async function addSongToQueue(message, connection, url, isFirstSong = false) {
 function playNextSong(connection) {
   if (songQueue.length > 0) {
     const nextSong = songQueue.shift();
-    playAudio(connection, nextSong.url);
+    playAudio(connection, nextSong.url).catch(error => {
+      console.error('Error playing next song:', error);
+      handleError(message, 'An error occurred while playing the next song.');
+    });
   } else {
     connection.destroy();
   }

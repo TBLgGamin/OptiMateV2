@@ -20,12 +20,13 @@ async function force(message, url) {
 
 function stop(message) {
   const connection = getVoiceConnection(message.guild.id);
-  if (connection) {
-    songQueue.length = 0; // Clear the queue
-    connection.destroy(); // Leave the voice channel
+  if (connection && connection.state.subscription) {
+    const player = connection.state.subscription.player;
+    songQueue.length = 0;
+    player.stop(true);
     message.reply('Stopped playing and cleared the queue.');
   } else {
-    message.reply('I am not in a voice channel.');
+    message.reply('I am not in a voice channel or no music is playing.');
   }
 }
 
