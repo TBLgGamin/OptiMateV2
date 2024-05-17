@@ -1,6 +1,6 @@
 # OptiMateV2 Discord Bot
 
-OptiMateV2 is a Discord bot designed to play high-quality audio from YouTube in your Discord voice channels. It includes commands to play, queue, stop, and manage playback of audio tracks.
+OptiMateV2 is a Discord bot designed to play high-quality audio from YouTube/Spotify in your Discord voice channels. It includes commands to play, queue, stop, and manage playback of audio tracks.
 
 ## Features
 
@@ -44,26 +44,26 @@ Displays a list of available commands and their descriptions.
     ```bash
     npm install discord.js @discordjs/voice ytdl-core prism-media dotenv spotify-url-info@latest play-dl @discordjs/opus opusscript
     ```
-2.1 Install the required dependencies:
+3 Install the required dependencies 2:
     ```bash
     npm install opusscript
     ```
 
 *After you've installed the dependencies head to windows powershell as administrator*
 
-3. Install Node.js:
+4. Install Node.js:
     https://nodejs.org/en
 
-4. Install FFMpeg:
+5. Install FFMpeg:
     ```bash
     choco install ffmpeg-full
     ```
-5. Install Visual studio:
+6. Install Visual studio:
     ```bash
     choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --passive --locale en-US"
     ```
 
-3. Edit the `.env.copy` file in the project directory and add your Discord bot token:
+7. Edit the `.env.copy` file in the project directory and add your Discord bot token:
     ```env
     OptiMateV2Token=YOUR_DISCORD_BOT_TOKEN
     ```
@@ -73,6 +73,7 @@ Displays a list of available commands and their descriptions.
 
 1. Start the bot:
     ```bash
+    cd OptiMateV2
     node bot.js
     ```
 
