@@ -4,14 +4,14 @@ const {
   createAudioResource, 
   AudioPlayerStatus, 
   NoSubscriberBehavior, 
-  VoiceConnectionStatus 
 } = require('@discordjs/voice');
-const prism = require('prism-media');
+const { EmbedBuilder } = require('discord.js');
 const spdl = require('spotify-url-info');
 const playdl = require('play-dl');
 const { getData } = require('spotify-url-info')(fetch);
 
 let songQueue = [];
+let player;
 
 async function playAudio(connection, url, videoInfo) {
   const stream = await ytdl(url, { 
@@ -21,15 +21,88 @@ async function playAudio(connection, url, videoInfo) {
     liveBuffer: 30000
   });
 
+  const duration = videoInfo.video_details.durationInSec || parseInt(videoInfo.video_details.lengthSeconds, 10) || 0;
+
   const resource = createAudioResource(stream, { 
     inlineVolume: true,
     metadata: { 
       title: videoInfo.video_details.title, 
-      duration: parseInt(videoInfo.video_details.lengthSeconds, 10)
+      duration: duration
     }
   });
 
-  const player = createAudioPlayer({
+  player.play(resource);
+}
+
+async function getYouTubeUrlFromSpotify(spotifyUrl) {
+  const spotifyInfo = await getData(spotifyUrl);
+  const searchQuery = `${spotifyInfo.name} ${spotifyInfo.artists[0].name}`;
+  const searchResults = await playdl.search(searchQuery, { limit: 1 });
+  return searchResults[0].url;
+}
+
+async function addSongToQueue(message, connection, url) {
+  try {
+    let youtubeUrl = url;
+    if (url.includes('spotify.com')) {
+      youtubeUrl = await getYouTubeUrlFromSpotify(url);
+    }
+
+    const videoInfo = await playdl.video_info(youtubeUrl);
+    songQueue.push({ url: youtubeUrl, title: videoInfo.video_details.title });
+
+    if (player.state.status === AudioPlayerStatus.Idle) {
+      await playNextSong(connection);
+      const nowPlayingEmbed = new EmbedBuilder()
+        .setColor('#0099ff')
+        .setTitle('Now Playing')
+        .setDescription(`**${videoInfo.video_details.title}**`);
+      await message.reply({ embeds: [nowPlayingEmbed] });
+    } else {
+      const addedToQueueEmbed = new EmbedBuilder()
+        .setColor('#0099ff')
+        .setTitle('Song Added to Queue')
+        .setDescription(`Your song has been added to the queue at position ${songQueue.length}.`);
+      await message.reply({ embeds: [addedToQueueEmbed] });
+    }
+  } catch (error) {
+    console.error('Error fetching video info:', error);
+    await handleError(message, 'There was an error playing the song.');
+  }
+}
+
+function displayQueue(message) {
+  if (songQueue.length === 0) {
+    const emptyQueueEmbed = new EmbedBuilder()
+      .setColor('#0099ff')
+      .setTitle('Current Queue')
+      .setDescription('The queue is currently empty.');
+    message.reply({ embeds: [emptyQueueEmbed] });
+  } else {
+    const queueMessage = songQueue.map((song, index) => `${index + 1}. **${song.title}**`).join('\n');
+    const queueEmbed = new EmbedBuilder()
+      .setColor('#0099ff')
+      .setTitle('Current Queue')
+      .setDescription(queueMessage);
+    message.reply({ embeds: [queueEmbed] });
+  }
+}
+
+async function playNextSong(connection) {
+  if (songQueue.length > 0) {
+    const nextSong = songQueue.shift();
+    const videoInfo = await playdl.video_info(nextSong.url);
+    await playAudio(connection, nextSong.url, videoInfo).catch(error => {
+      console.error('Error playing next song:', error);
+      handleError(message, 'An error occurred while playing the next song.');
+    });
+  } else {
+    connection.destroy();
+  }
+}
+
+function createAudioPlayerAndSubscribe(connection) {
+  player = createAudioPlayer({
     behaviors: {
       noSubscriber: NoSubscriberBehavior.Pause,
     },
@@ -47,74 +120,15 @@ async function playAudio(connection, url, videoInfo) {
     connection.destroy();
   });
 
-  connection.on('error', (error) => {
-    console.error('Connection error:', error.message);
-    handleError(message, 'An error occurred with the voice connection.');
-    player.stop(true);
-    connection.destroy();
-  });
-
-  connection.on(VoiceConnectionStatus.Destroyed, () => {
-    console.log('Connection destroyed. Cleaning up player.');
-    if (player.state.status !== AudioPlayerStatus.Idle) {
-      player.stop(true);
-    }
-  });
-
   connection.subscribe(player);
-  player.play(resource);
-
-  return player;
-}
-
-
-async function getYouTubeUrlFromSpotify(spotifyUrl) {
-  const spotifyInfo = await getData(spotifyUrl);
-  const searchQuery = `${spotifyInfo.name} ${spotifyInfo.artists[0].name}`;
-  const searchResults = await playdl.search(searchQuery, { limit: 1 });
-  return searchResults[0].url;
-}
-
-async function addSongToQueue(message, connection, url, isFirstSong = false) {
-  try {
-    let youtubeUrl = url;
-    if (url.includes('spotify.com')) {
-      youtubeUrl = await getYouTubeUrlFromSpotify(url);
-    }
-
-    const videoInfo = await playdl.video_info(youtubeUrl);
-    if (isFirstSong) {
-      await playAudio(connection, youtubeUrl, videoInfo);
-      await message.reply(`Playing your song: **${videoInfo.video_details.title}**!`);
-    } else {
-      songQueue.push({ url: youtubeUrl, title: videoInfo.video_details.title });
-      if (songQueue.length === 1) {
-        await playAudio(connection, youtubeUrl, videoInfo);
-        await message.reply(`Playing your song: **${videoInfo.video_details.title}**!`);
-      } else {
-        await message.reply(`Your song has been added to the queue at position ${songQueue.length - 1}.`);
-      }
-    }
-  } catch (error) {
-    console.error('Error fetching video info:', error);
-    await handleError(message, 'There was an error playing the song.');
-  }
-}
-
-function playNextSong(connection) {
-  if (songQueue.length > 0) {
-    const nextSong = songQueue.shift();
-    playAudio(connection, nextSong.url).catch(error => {
-      console.error('Error playing next song:', error);
-      handleError(message, 'An error occurred while playing the next song.');
-    });
-  } else {
-    connection.destroy();
-  }
 }
 
 async function handleError(message, errorMessage) {
-  await message.reply(errorMessage);
+  const errorEmbed = new EmbedBuilder()
+    .setColor('#ff0000')
+    .setTitle('Error')
+    .setDescription(errorMessage);
+  await message.reply({ embeds: [errorEmbed] });
 }
 
 module.exports = {
@@ -124,4 +138,6 @@ module.exports = {
   songQueue,
   playAudio,
   getYouTubeUrlFromSpotify,
+  displayQueue,
+  createAudioPlayerAndSubscribe,
 };

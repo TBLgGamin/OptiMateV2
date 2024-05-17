@@ -12,6 +12,8 @@ function helpme(message) {
       { name: '!force <URL>', value: 'Forces a new song to play immediately, stopping the current playback and clearing the queue.' },
       { name: '!pause', value: 'Pauses the current playback.' },
       { name: '!play', value: 'Resumes the paused playback.' },
+      { name: '!np', value: 'Shows the currently playing song and timestamp.' },
+      { name: '!skip', value: 'Skips the current song and plays the next one in the queue.' },
       { name: '!helpme', value: 'Displays this help message with all available commands.' }
     );
 

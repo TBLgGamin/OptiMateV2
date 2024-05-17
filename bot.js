@@ -1,8 +1,8 @@
 require('dotenv').config();
 const { Client, GatewayIntentBits } = require('discord.js');
-const { joinVoiceChannel, getVoiceConnection, VoiceConnectionStatus } = require('@discordjs/voice');
-const { playAudio, handleError, addSongToQueue, displayQueue, songQueue } = require('./audio_stream');
-const { stop, force, pauseOrResume, nowPlaying } = require('./command_handler');
+const { joinVoiceChannel, getVoiceConnection, VoiceConnectionStatus, createAudioPlayer, NoSubscriberBehavior } = require('@discordjs/voice');
+const { handleError, addSongToQueue, displayQueue, songQueue, createAudioPlayerAndSubscribe } = require('./audio_stream');
+const { stop, force, pauseOrResume, nowPlaying, skip} = require('./command_handler');
 const { helpme } = require('./helpme');
 
 const client = new Client({
@@ -22,7 +22,7 @@ client.on('messageCreate', async (message) => {
   if (message.content.startsWith('!play')) {
     const args = message.content.split(' ');
     const url = args[1];
-  
+
     if (!url) {
       return handleError(message, 'Please provide a valid URL.');
     }
@@ -54,10 +54,11 @@ client.on('messageCreate', async (message) => {
           console.error('Connection error:', error.message);
           connection.destroy();
         });
+
+        createAudioPlayerAndSubscribe(connection);
       }
 
-      const isFirstSong = songQueue.length === 0;
-      await addSongToQueue(message, connection, url, isFirstSong);
+      await addSongToQueue(message, connection, url);
     } catch (error) {
       console.error('Error creating the voice connection:', error);
       await handleError(message, 'There was an error connecting to the voice channel.');
@@ -74,14 +75,15 @@ client.on('messageCreate', async (message) => {
     } else {
       handleError(message, 'Please provide a valid URL.');
     }
-  } else if (message.content.startsWith('!pause') || message.content.startsWith('!play')) {
+  } else if (message.content.startsWith('!pause') || message.content.startsWith('!resume')) {
     pauseOrResume(message);
   } else if (message.content.startsWith('!helpme')) {
     helpme(message);
   } else if (message.content.startsWith('!np')) {
     nowPlaying(message);
+  } else if (message.content.startsWith('!skip')) {
+    skip(message);
   }
-
 });
 
 client.login(process.env.OptiMateV2Token);

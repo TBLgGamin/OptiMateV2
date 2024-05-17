@@ -33,6 +33,21 @@ function stop(message) {
   }
 }
 
+async function skip(message) {
+  const connection = getVoiceConnection(message.guild.id);
+  if (connection && connection.state.subscription) {
+    const player = connection.state.subscription.player;
+    if (songQueue.length > 0) {
+      player.stop(true);
+      message.reply('Skipped to the next song.');
+    } else {
+      message.reply('No more songs in the queue to skip to.');
+    }
+  } else {
+    message.reply('I am not in a voice channel or no music is playing.');
+  }
+}
+
 function pauseOrResume(message) {
   const connection = getVoiceConnection(message.guild.id);
   if (connection && connection.state.subscription) {
@@ -58,7 +73,7 @@ async function nowPlaying(message) {
     if (player.state.status === AudioPlayerStatus.Playing) {
       const currentResource = player.state.resource;
       const currentTime = currentResource.playbackDuration / 1000;
-      const totalDuration = currentResource.metadata.duration;
+      const totalDuration = currentResource.metadata.duration || 1;
 
       const progress = `${Math.floor(currentTime / 60)}:${Math.floor(currentTime % 60).toString().padStart(2, '0')} / ${Math.floor(totalDuration / 60)}:${Math.floor(totalDuration % 60).toString().padStart(2, '0')}`;
 
@@ -77,10 +92,10 @@ async function nowPlaying(message) {
   }
 }
 
-
 module.exports = {
   stop,
   force,
   pauseOrResume,
   nowPlaying,
+  skip,
 };
