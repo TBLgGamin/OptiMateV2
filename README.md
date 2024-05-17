@@ -32,6 +32,12 @@ Resumes the paused song.
 ### !helpme
 Displays a list of available commands and their descriptions.
 
+### !np
+Shows the currently playing song and timestamp.
+
+### !skip
+Skips the current song and plays the next one in the queue.
+
 ## Installation
 
 Run install.js to install all the required dependencies and packages for the bot to run.
@@ -42,7 +48,7 @@ Run install.js to install all the required dependencies and packages for the bot
     cd OptiMateV2
     node install.js
     ```
-If that doesnt work you can use the manual install method as listed below:
+If that doesn't work you can use the manual install method as listed below:
 
 1. Clone the repository:
     ```bash
@@ -54,26 +60,22 @@ If that doesnt work you can use the manual install method as listed below:
     ```bash
     npm install discord.js @discordjs/voice ytdl-core prism-media dotenv spotify-url-info@latest play-dl @discordjs/opus opusscript
     ```
-3 Install the required dependencies 2:
-    ```bash
-    npm install opusscript
-    ```
 
 *After you've installed the dependencies head to windows powershell as administrator*
 
-4. Install Node.js:
+3. Install Node.js:
     https://nodejs.org/en
 
-5. Install FFMpeg:
+4. Install FFMpeg:
     ```bash
     choco install ffmpeg-full
     ```
-6. Install Visual studio:
+5. Install Visual studio:
     ```bash
     choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --passive --locale en-US"
     ```
 
-7. Edit the `.env.copy` file in the project directory and add your Discord bot token:
+6. Edit the `.env.copy` file in the project directory and add your Discord bot token:
     ```env
     OptiMateV2Token=YOUR_DISCORD_BOT_TOKEN
     ```
