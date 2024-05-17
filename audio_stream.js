@@ -7,6 +7,9 @@ const {
   VoiceConnectionStatus 
 } = require('@discordjs/voice');
 const prism = require('prism-media');
+const spdl = require('spotify-url-info');
+const playdl = require('play-dl');
+const { getData } = require('spotify-url-info')(fetch);
 
 let songQueue = [];
 
@@ -65,17 +68,29 @@ async function playAudio(connection, url) {
   return player;
 }
 
+async function getYouTubeUrlFromSpotify(spotifyUrl) {
+  const spotifyInfo = await getData(spotifyUrl);
+  const searchQuery = `${spotifyInfo.name} ${spotifyInfo.artists[0].name}`;
+  const searchResults = await playdl.search(searchQuery, { limit: 1 });
+  return searchResults[0].url;
+}
+
 async function addSongToQueue(message, connection, url, isFirstSong = false) {
   try {
-    const videoInfo = await ytdl.getInfo(url);
+    let youtubeUrl = url;
+    if (url.includes('spotify.com')) {
+      youtubeUrl = await getYouTubeUrlFromSpotify(url);
+    }
+    
+    const videoInfo = await playdl.video_info(youtubeUrl);
     if (isFirstSong) {
-      await playAudio(connection, url);
-      await message.reply(`Playing your song: **${videoInfo.videoDetails.title}**!`);
+      await playAudio(connection, youtubeUrl);
+      await message.reply(`Playing your song: **${videoInfo.video_details.title}**!`);
     } else {
-      songQueue.push({ url, title: videoInfo.videoDetails.title });
+      songQueue.push({ url: youtubeUrl, title: videoInfo.video_details.title });
       if (songQueue.length === 1) {
-        await playAudio(connection, url);
-        await message.reply(`Playing your song: **${videoInfo.videoDetails.title}**!`);
+        await playAudio(connection, youtubeUrl);
+        await message.reply(`Playing your song: **${videoInfo.video_details.title}**!`);
       } else {
         await message.reply(`Your song has been added to the queue at position ${songQueue.length - 1}.`);
       }
@@ -91,28 +106,19 @@ function playNextSong(connection) {
     const nextSong = songQueue.shift();
     playAudio(connection, nextSong.url);
   } else {
-    console.log('Queue is empty, leaving voice channel.');
     connection.destroy();
   }
-}
-
-function displayQueue(message) {
-  if (songQueue.length === 0) {
-    return message.reply('The queue is currently empty.');
-  }
-
-  const queueList = songQueue.map((song, index) => `${index + 1}. ${song.title}`);
-  const queueEmbed = {
-    color: 0x0099ff,
-    title: 'Song Queue',
-    description: queueList.join('\n'),
-  };
-
-  message.reply({ embeds: [queueEmbed] });
 }
 
 async function handleError(message, errorMessage) {
   await message.reply(errorMessage);
 }
 
-module.exports = { playAudio, handleError, addSongToQueue, displayQueue, songQueue, playNextSong };
+module.exports = {
+  addSongToQueue,
+  playNextSong,
+  handleError,
+  songQueue,
+  playAudio,
+  getYouTubeUrlFromSpotify,
+};

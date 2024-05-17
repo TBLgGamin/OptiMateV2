@@ -22,7 +22,7 @@ client.on('messageCreate', async (message) => {
   if (message.content.startsWith('!play')) {
     const args = message.content.split(' ');
     const url = args[1];
-
+  
     if (!url) {
       return handleError(message, 'Please provide a valid URL.');
     }
