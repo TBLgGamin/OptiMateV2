@@ -2,7 +2,7 @@ require('dotenv').config();
 const { Client, GatewayIntentBits } = require('discord.js');
 const { joinVoiceChannel, getVoiceConnection, VoiceConnectionStatus } = require('@discordjs/voice');
 const { playAudio, handleError, addSongToQueue, displayQueue, songQueue } = require('./audio_stream');
-const { stop, force, pauseOrResume } = require('./command_handler');
+const { stop, force, pauseOrResume, nowPlaying } = require('./command_handler');
 const { helpme } = require('./helpme');
 
 const client = new Client({
@@ -78,7 +78,10 @@ client.on('messageCreate', async (message) => {
     pauseOrResume(message);
   } else if (message.content.startsWith('!helpme')) {
     helpme(message);
+  } else if (message.content.startsWith('!np')) {
+    nowPlaying(message);
   }
+
 });
 
 client.login(process.env.OptiMateV2Token);

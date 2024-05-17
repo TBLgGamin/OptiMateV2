@@ -13,7 +13,7 @@ const { getData } = require('spotify-url-info')(fetch);
 
 let songQueue = [];
 
-async function playAudio(connection, url) {
+async function playAudio(connection, url, videoInfo) {
   const stream = await ytdl(url, { 
     filter: 'audioonly', 
     highWaterMark: 1 << 25,
@@ -21,7 +21,13 @@ async function playAudio(connection, url) {
     liveBuffer: 30000
   });
 
-  const resource = createAudioResource(stream, { inlineVolume: true });
+  const resource = createAudioResource(stream, { 
+    inlineVolume: true,
+    metadata: { 
+      title: videoInfo.video_details.title, 
+      duration: parseInt(videoInfo.video_details.lengthSeconds, 10)
+    }
+  });
 
   const player = createAudioPlayer({
     behaviors: {
@@ -61,6 +67,7 @@ async function playAudio(connection, url) {
   return player;
 }
 
+
 async function getYouTubeUrlFromSpotify(spotifyUrl) {
   const spotifyInfo = await getData(spotifyUrl);
   const searchQuery = `${spotifyInfo.name} ${spotifyInfo.artists[0].name}`;
@@ -74,15 +81,15 @@ async function addSongToQueue(message, connection, url, isFirstSong = false) {
     if (url.includes('spotify.com')) {
       youtubeUrl = await getYouTubeUrlFromSpotify(url);
     }
-    
+
     const videoInfo = await playdl.video_info(youtubeUrl);
     if (isFirstSong) {
-      await playAudio(connection, youtubeUrl);
+      await playAudio(connection, youtubeUrl, videoInfo);
       await message.reply(`Playing your song: **${videoInfo.video_details.title}**!`);
     } else {
       songQueue.push({ url: youtubeUrl, title: videoInfo.video_details.title });
       if (songQueue.length === 1) {
-        await playAudio(connection, youtubeUrl);
+        await playAudio(connection, youtubeUrl, videoInfo);
         await message.reply(`Playing your song: **${videoInfo.video_details.title}**!`);
       } else {
         await message.reply(`Your song has been added to the queue at position ${songQueue.length - 1}.`);

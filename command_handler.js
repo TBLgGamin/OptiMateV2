@@ -1,13 +1,16 @@
 const { playAudio, handleError, songQueue, playNextSong, getYouTubeUrlFromSpotify } = require('./audio_stream');
 const { getVoiceConnection, AudioPlayerStatus } = require('@discordjs/voice');
+const { EmbedBuilder } = require('discord.js');
+const playdl = require('play-dl');
 
 async function force(message, url) {
   const connection = getVoiceConnection(message.guild.id);
   if (connection) {
     try {
-      songQueue.length = 0; // Clear the queue
+      songQueue.length = 0;
       const youtubeUrl = url.includes('spotify.com') ? await getYouTubeUrlFromSpotify(url) : url;
-      await playAudio(connection, youtubeUrl); // Play the new song
+      const videoInfo = await playdl.video_info(youtubeUrl);
+      await playAudio(connection, youtubeUrl, videoInfo);
       message.reply('Forcing song to play.');
     } catch (error) {
       console.error('Error forcing song to play:', error);
@@ -48,8 +51,36 @@ function pauseOrResume(message) {
   }
 }
 
+async function nowPlaying(message) {
+  const connection = getVoiceConnection(message.guild.id);
+  if (connection && connection.state.subscription) {
+    const player = connection.state.subscription.player;
+    if (player.state.status === AudioPlayerStatus.Playing) {
+      const currentResource = player.state.resource;
+      const currentTime = currentResource.playbackDuration / 1000;
+      const totalDuration = currentResource.metadata.duration;
+
+      const progress = `${Math.floor(currentTime / 60)}:${Math.floor(currentTime % 60).toString().padStart(2, '0')} / ${Math.floor(totalDuration / 60)}:${Math.floor(totalDuration % 60).toString().padStart(2, '0')}`;
+
+      const embed = new EmbedBuilder()
+        .setColor('#0099ff')
+        .setTitle('Now Playing')
+        .setDescription(`**${currentResource.metadata.title}**`)
+        .addFields({ name: 'Progress', value: progress, inline: true });
+
+      message.reply({ embeds: [embed] });
+    } else {
+      message.reply('No music is currently playing.');
+    }
+  } else {
+    message.reply('I am not in a voice channel.');
+  }
+}
+
+
 module.exports = {
   stop,
   force,
   pauseOrResume,
+  nowPlaying,
 };
