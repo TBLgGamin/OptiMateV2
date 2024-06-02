@@ -3,6 +3,7 @@ const { getVoiceConnection, createAudioPlayer, AudioPlayerStatus } = require('@d
 const { EmbedBuilder } = require('discord.js');
 const playdl = require('play-dl');
 const { autodj } = require('./autodj');
+const { stopAutoDJ } = require('./autodj');
 
 async function force(message, url) {
   const connection = getVoiceConnection(message.guild.id);
@@ -38,7 +39,7 @@ function stop(message) {
     const player = connection.state.subscription.player;
     songQueue.length = 0;
     player.stop(true);
-    autodj.stopAutoDJ();
+    stopAutoDJ();
     message.reply('Stopped playing and cleared the queue.');
   } else {
     message.reply('I am not in a voice channel or no music is playing.');

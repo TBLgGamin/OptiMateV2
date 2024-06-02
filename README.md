@@ -48,7 +48,11 @@ Enables AutoDJ mode, playing related songs automatically after the current queue
 
 Before trying to install the code you need your own bot and its token to insert into the .env file.
 A tutorial can be found here: https://www.youtube.com/watch?v=hoDLj0IzZMU&t=1s watch from 1:30 to 4:10
-Run install.js to install all the required dependencies and packages for the bot to run.
+
+Then install node.js (which simply put is a package manager)
+https://nodejs.org/en/
+
+After install node.js run install.js to install all the required dependencies and packages for the bot to run.
 *Navigate to powershell as administrator*
 1. Automatic install:
     ```bash
@@ -56,6 +60,12 @@ Run install.js to install all the required dependencies and packages for the bot
     cd OptiMateV2
     node install.js
     ```
+2. Edit the `.env.copy` file in the project directory and add your Discord bot token:
+    ```env
+    OptiMateV2Token=YOUR_DISCORD_BOT_TOKEN
+    ```
+    Rename the file to .env
+
 If that doesn't work you can use the manual install method as listed below:
 
 1. Clone the repository:
@@ -63,16 +73,15 @@ If that doesn't work you can use the manual install method as listed below:
     git clone https://github.com/TBLgGamin/OptiMateV2
     cd OptiMateV2
     ```
+2. Install Node.js:
+    https://nodejs.org/en
 
-2. Install the required dependencies:
+3. Install the required dependencies:
     ```bash
-    npm install discord.js @discordjs/voice ytdl-core prism-media dotenv spotify-url-info@latest play-dl @discordjs/opus opusscript axios cheerio
+    npm install discord.js @discordjs/voice ytdl-core prism-media dotenv spotify-url-info@latest play-dl @discordjs/opus opusscript axios cheerio node-cache
     ```
 
 *After you've installed the dependencies head to windows powershell as administrator*
-
-3. Install Node.js:
-    https://nodejs.org/en
 
 4. Install FFMpeg:
     ```bash
